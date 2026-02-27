@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from database import get_db
 from typing import List, Optional
-import crud
+import crud,registrationcrud
 import schemas
 import logging
 import io
@@ -173,10 +173,17 @@ def download_property_images(
 
 
 
-@app.get("/test")
-def read_root():
-    return {"message": "Hello, Asha!"}
 
-@app.get("/test1")
-def read_root():
-    return {"message": "Hello, Shivay!"}
+@app.post("/register/customer")
+def register_customer(data: schemas.CustomerCreate, db: Session = Depends(get_db)):
+    return registrationcrud.create_customer(db, data)
+
+
+@app.post("/register/agent")
+def register_agent(data: schemas.AgentCreate, db: Session = Depends(get_db)):
+    return registrationcrud.create_agent(db, data)
+
+
+@app.post("/register/builder")
+def register_builder(data: schemas.BuilderCreate, db: Session = Depends(get_db)):
+    return registrationcrud.create_builder(db, data)

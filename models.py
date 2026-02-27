@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, String, Enum, DECIMAL, \
-    TIMESTAMP, Text,TEXT, Boolean, SmallInteger, TypeDecorator
+    TIMESTAMP, Text, TEXT, Boolean, SmallInteger, TypeDecorator, text
 from database import Base
 from typing import Optional, List
 import enum
@@ -118,3 +118,42 @@ class Property(Base):
 
     parking_spaces = Column(SmallInteger, default=0)
     ##image_ids: Optional[List[int]] = []
+
+class Customer(Base):
+    __tablename__ = "customers"
+
+    id = Column(BigInteger, primary_key=True, index=True)
+    full_name = Column(String(150))
+    email = Column(String(150), unique=True, index=True)
+    phone = Column(String(20), unique=True)
+    password_hash = Column(String(255))
+    city = Column(String(100))
+    created_at = Column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"))
+
+
+class Agent(Base):
+    __tablename__ = "agents"
+
+    id = Column(BigInteger, primary_key=True, index=True)
+    full_name = Column(String(150))
+    email = Column(String(150), unique=True, index=True)
+    phone = Column(String(20), unique=True)
+    password_hash = Column(String(255))
+    rera_number = Column(String(100))
+    agency_name = Column(String(150))
+    city = Column(String(100))
+    created_at = Column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"))
+
+
+class Builder(Base):
+    __tablename__ = "builders"
+
+    id = Column(BigInteger, primary_key=True, index=True)
+    company_name = Column(String(200))
+    contact_person = Column(String(150))
+    email = Column(String(150), unique=True, index=True)
+    phone = Column(String(20), unique=True)
+    password_hash = Column(String(255))
+    rera_number = Column(String(100))
+    city = Column(String(100))
+    created_at = Column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"))

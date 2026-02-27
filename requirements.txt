@@ -6,3 +6,5 @@ python-dotenv
 pydantic
 python-multipart
 aiomysql
+passlib[bcrypt]
+pydantic[email]

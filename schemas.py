@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field,EmailStr
 from typing import Optional, List
 from decimal import Decimal
 import datetime
@@ -86,4 +86,30 @@ class ImageDownloadRequest(BaseModel):
     class Config:
         from_attributes = True
 
+class CustomerCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    phone: str
+    password: str
+    city: str | None = None
+
+
+class AgentCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    phone: str
+    password: str
+    rera_number: str | None = None
+    agency_name: str | None = None
+    city: str | None = None
+
+
+class BuilderCreate(BaseModel):
+    company_name: str
+    contact_person: str | None = None
+    email: EmailStr
+    phone: str
+    password: str
+    rera_number: str | None = None
+    city: str | None = None
 
