@@ -1,0 +1,182 @@
+#from fastapi import FastAPI
+
+#app = FastAPI()
+from fastapi import FastAPI, UploadFile, File, Form, Depends, HTTPException
+from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
+from database import get_db
+from typing import List, Optional
+import crud
+import schemas
+import logging
+import io
+from schemas import ImageDownloadRequest
+from crud import get_images_as_zip
+from models import Property
+
+app = FastAPI(title="Property API")
+
+
+# ✅ CREATE PROPERTY
+@app.post("/createproperty")
+def create_property(
+    request: schemas.PropertyCreate,
+    db: Session = Depends(get_db)
+):
+    try:
+        # ✅ Create property object (FULL FIELD MAPPING)
+        new_property = Property(
+            title=request.title,
+            property_type=request.property_type,
+            city=request.city,
+            project_name=request.project_name,
+
+            possession_status=request.possession_status,
+            property_post_status=request.property_post_status,
+
+            expected_price=request.expected_price,
+            booking_amount=request.booking_amount,
+            is_price_negotiable=request.is_price_negotiable,
+
+            carpet_area=request.carpet_area,
+            super_area=request.super_area,
+
+            bedrooms=request.bedrooms,
+            bathrooms=request.bathrooms,
+            balconies=request.balconies,
+
+            rera_id=request.rera_id,
+            builder_name=request.builder_name,
+            builder_logo=request.builder_logo,
+
+            nearby_landmarks=request.nearby_landmarks,
+            latitude=request.latitude,
+            longitude=request.longitude,
+            map_address=request.map_address,
+
+            property_features=request.property_features,
+            facilities=request.facilities,
+
+            property_age=request.property_age,
+            floor_number=request.floor_number,
+            total_floors=request.total_floors,
+
+            facing=request.facing,
+            furnished_status=request.furnished_status,
+            parking_spaces=request.parking_spaces,
+        )
+
+        # ✅ Save property
+        db.add(new_property)
+        db.commit()
+        db.refresh(new_property)
+
+        # ✅ Link images (if provided)
+        if request.image_ids:
+            updated = (
+                db.query(schemas.PropertyImage)
+                .filter(schemas.PropertyImage.id.in_(request.image_ids))
+                .update(
+                    {"property_id": new_property.id},
+                    synchronize_session=False
+                )
+            )
+
+            if updated != len(request.image_ids):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Some image_ids are invalid"
+                )
+
+            db.commit()
+
+        # ✅ Response
+        return {
+            "property_id": new_property.id,
+            "message": "Property created successfully"
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ✅ GET ALL PROPERTIES
+@app.get("/properties", response_model=list[schemas.PropertyResponse])
+def get_properties(
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    return crud.get_all_properties(db, skip, limit)
+
+@app.post("/property-images/upload")
+async def upload_property_images(
+    #property_id: int = Form(...),
+    image_url: Optional[str] = Form(None),
+    files: List[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+):
+    try:
+        inserted_ids = []
+
+        for file in files:
+            content = await file.read()
+
+            image = schemas.PropertyImage(
+               ## property_id=property_id,
+                image_url=image_url,
+                image_data=content,
+            )
+
+            db.add(image)
+            db.flush()  # ✅ gets ID without commit
+            inserted_ids.append(image.id)
+
+        db.commit()
+
+        return {
+            "message": "Images uploaded successfully",
+            "image_ids": inserted_ids,
+            "count": len(inserted_ids),
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/property-images/download")
+def download_property_images(
+    request: ImageDownloadRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Download multiple property images as ZIP
+    """
+
+    if not request.image_ids:
+        raise HTTPException(status_code=400, detail="image_ids required")
+
+    zip_bytes = get_images_as_zip(db, request.image_ids)
+
+    if not zip_bytes:
+        raise HTTPException(status_code=404, detail="Images not found")
+
+    return StreamingResponse(
+        io.BytesIO(zip_bytes),
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": "attachment; filename=property_images.zip"
+        },
+    )
+
+
+
+@app.get("/test")
+def read_root():
+    return {"message": "Hello, Asha!"}
+
+@app.get("/test1")
+def read_root():
+    return {"message": "Hello, Shivay!"}
