@@ -1,10 +1,12 @@
-from pydantic import BaseModel, Field,EmailStr
+from pydantic import BaseModel, Field,EmailStr, ConfigDict
 from typing import Optional, List
 from decimal import Decimal
 import datetime
 from sqlalchemy import Column, BigInteger, String, LargeBinary, TIMESTAMP, func
 from database import Base
 from models import *
+
+
 class PropertyImage(Base):
     __tablename__ = "property_images"
 
@@ -78,6 +80,7 @@ class PropertyResponse(BaseModel):
     furnished_status: Optional[str] = None
     parking_spaces: Optional[int] = None
     image_ids: List[int] = Field(default_factory=list)
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ImageDownloadRequest(BaseModel):
