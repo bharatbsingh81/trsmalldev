@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from models import Property
-from schemas import PropertyCreate, PropertyImage, PropertyResponse
+from models import Property, CurrentProperty
+from schemas import PropertyCreate, PropertyImage, PropertyResponse, CurrentPropertyCreate
 from collections import defaultdict
 import json
 import io
@@ -78,3 +78,18 @@ def get_all_properties(db: Session, skip: int = 0, limit: int = 10):
         response.append(prop_dict)
 
     return response
+
+def create_propertyNew(db: Session, property_data: CurrentPropertyCreate):
+    db_obj = CurrentProperty(**property_data.model_dump(exclude_unset=True))
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+
+def list_propertiesNew(db: Session, skip: int = 0, limit: int = 50):
+    return db.query(CurrentProperty).offset(skip).limit(limit).all()
+
+
+def get_property(db: Session, property_id: int):
+    return db.query(CurrentProperty).filter(CurrentProperty.id == property_id).first()

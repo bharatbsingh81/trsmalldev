@@ -187,3 +187,13 @@ def register_agent(data: schemas.AgentCreate, db: Session = Depends(get_db)):
 @app.post("/register/builder")
 def register_builder(data: schemas.BuilderCreate, db: Session = Depends(get_db)):
     return registrationcrud.create_builder(db, data)
+
+
+@app.post("/current-properties/create", response_model=schemas.CurrentPropertyResponse)
+def create_property(property_data: schemas.CurrentPropertyCreate, db: Session = Depends(get_db)):
+    return crud.create_propertyNew(db, property_data)
+
+
+@app.get("/current-properties", response_model=list[schemas.CurrentPropertyResponse])
+def list_properties(skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):
+    return crud.list_propertiesNew(db, skip, limit)

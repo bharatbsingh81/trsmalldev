@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field,EmailStr, ConfigDict
 from typing import Optional, List
 from decimal import Decimal
-import datetime
+from datetime import datetime
 from sqlalchemy import Column, BigInteger, String, LargeBinary, TIMESTAMP, func
 from database import Base
 from models import *
@@ -116,3 +116,35 @@ class BuilderCreate(BaseModel):
     rera_number: str | None = None
     city: str | None = None
 
+
+
+class CurrentPropertyBase(BaseModel):
+    title: Optional[str] = None
+    bedrooms: Optional[str] = None
+    map_location: Optional[str] = None
+    agent_email: Optional[str] = None
+    property_type: Optional[str] = None
+    image: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    gallery: Optional[str] = None
+    year_built: Optional[int] = None
+    status: Optional[str] = None
+    agent_name: Optional[str] = None
+    bathrooms: Optional[int] = None
+    agent_phone: Optional[str] = None
+    size: Optional[float] = None
+    floors: Optional[int] = None
+    owner: Optional[str] = None
+    created_date: Optional[datetime] = None
+    updated_date: Optional[datetime] = None
+
+
+class CurrentPropertyCreate(CurrentPropertyBase):
+    pass
+
+
+class CurrentPropertyResponse(CurrentPropertyBase):
+    id: int
+
+    model_config = ConfigDict(from_attributes=True)

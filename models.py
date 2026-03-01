@@ -1,5 +1,5 @@
-from sqlalchemy import Column, BigInteger, String, Enum, DECIMAL, \
-    TIMESTAMP, Text, TEXT, Boolean, SmallInteger, TypeDecorator, text
+from sqlalchemy import Column, BigInteger, String, Text, DECIMAL, Integer, DateTime, TIMESTAMP, func, Enum, Boolean, \
+    SmallInteger, text, TypeDecorator, TEXT
 from database import Base
 from typing import Optional, List
 import enum
@@ -157,3 +157,30 @@ class Builder(Base):
     rera_number = Column(String(100))
     city = Column(String(100))
     created_at = Column(TIMESTAMP, server_default=text("CURRENT_TIMESTAMP"))
+
+class CurrentProperty(Base):
+    __tablename__ = "current_properties"
+
+    id = Column(BigInteger, primary_key=True, index=True)
+
+    title = Column(String(255))
+    bedrooms = Column(String(50))
+    map_location = Column(String(255))
+    agent_email = Column(String(255))
+    property_type = Column(String(50))
+    image = Column(Text)
+    description = Column(Text)
+    price = Column(DECIMAL(15, 2))
+    gallery = Column(Text)
+    year_built = Column(Integer)
+    status = Column(String(50))
+    agent_name = Column(String(255))
+    bathrooms = Column(Integer)
+    agent_phone = Column(String(50))
+    size = Column(DECIMAL(12, 2))
+    floors = Column(Integer)
+    owner = Column(String(255))
+    created_date = Column(DateTime)
+    updated_date = Column(DateTime)
+
+    created_at = Column(TIMESTAMP, server_default=func.now())
