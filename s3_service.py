@@ -5,8 +5,8 @@ from botocore.exceptions import BotoCoreError, ClientError
 
 AWS_ACCESS_KEY_ID = ""
 AWS_SECRET_ACCESS_KEY = ""
-AWS_REGION = "ap-south-1"
-AWS_S3_BUCKET = "amzn-s3-bucket-trsmallproperties"
+AWS_REGION = ""
+AWS_S3_BUCKET = ""
 
 s3_client = boto3.client(
     "s3",
