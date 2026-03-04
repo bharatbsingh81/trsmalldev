@@ -12,11 +12,12 @@ import logging
 import io
 from schemas import ImageDownloadRequest
 from crud import get_images_as_zip
+from s3_service import upload_file_to_s3
 from models import Property
 
 app = FastAPI(title="Property API")
 
-
+'''
 # ✅ CREATE PROPERTY
 @app.post("/createproperty")
 def create_property(
@@ -99,7 +100,7 @@ def create_property(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-
+'''
 
 # ✅ GET ALL PROPERTIES
 @app.get("/properties", response_model=list[schemas.PropertyResponse])
@@ -109,41 +110,6 @@ def get_properties(
     db: Session = Depends(get_db)
 ):
     return crud.get_all_properties(db, skip, limit)
-
-@app.post("/property-images/upload")
-async def upload_property_images(
-    #property_id: int = Form(...),
-    image_url: Optional[str] = Form(None),
-    files: List[UploadFile] = File(...),
-    db: Session = Depends(get_db),
-):
-    try:
-        inserted_ids = []
-
-        for file in files:
-            content = await file.read()
-
-            image = schemas.PropertyImage(
-               ## property_id=property_id,
-                image_url=image_url,
-                image_data=content,
-            )
-
-            db.add(image)
-            db.flush()  # ✅ gets ID without commit
-            inserted_ids.append(image.id)
-
-        db.commit()
-
-        return {
-            "message": "Images uploaded successfully",
-            "image_ids": inserted_ids,
-            "count": len(inserted_ids),
-        }
-
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/property-images/download")
@@ -197,3 +163,24 @@ def create_property(property_data: schemas.CurrentPropertyCreate, db: Session = 
 @app.get("/current-properties", response_model=list[schemas.CurrentPropertyResponse])
 def list_properties(skip: int = 0, limit: int = 50, db: Session = Depends(get_db)):
     return crud.list_propertiesNew(db, skip, limit)
+
+@app.post("/upload-image")
+async def upload_image(file: UploadFile = File(...)):
+    try:
+        # basic validation
+        if not file.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="File must be an image")
+
+        file_url = upload_file_to_s3(
+            file.file,
+            file.filename,
+            file.content_type,
+        )
+
+        return {
+            "success": True,
+            "image_url": file_url,
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

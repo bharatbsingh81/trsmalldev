@@ -120,7 +120,7 @@ class BuilderCreate(BaseModel):
 
 class CurrentPropertyBase(BaseModel):
     title: Optional[str] = None
-    bedrooms: Optional[str] = None
+    bedrooms: Optional[int] = None
     map_location: Optional[str] = None
     agent_email: Optional[str] = None
     property_type: Optional[str] = None
