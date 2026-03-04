@@ -3,8 +3,8 @@ import os
 import uuid
 from botocore.exceptions import BotoCoreError, ClientError
 
-AWS_ACCESS_KEY_ID = "AKIA3OPND7VSXWK3KYMR"
-AWS_SECRET_ACCESS_KEY = "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"
+AWS_ACCESS_KEY_ID = ""
+AWS_SECRET_ACCESS_KEY = ""
 AWS_REGION = "ap-south-1"
 AWS_S3_BUCKET = "amzn-s3-bucket-trsmallproperties"
 
