@@ -148,3 +148,15 @@ class CurrentPropertyResponse(CurrentPropertyBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
+
+class AWSConfig(Base):
+    __tablename__ = "aws_config"
+
+    id = Column(BigInteger, primary_key=True, index=True)
+    aws_access_key_id = Column(String(255), nullable=False)
+    aws_secret_access_key = Column(String(255), nullable=False)
+    aws_region = Column(String(100), nullable=False)
+    aws_s3_bucket = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())

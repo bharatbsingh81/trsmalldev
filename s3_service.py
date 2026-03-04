@@ -1,34 +1,38 @@
 import boto3
-import os
 import uuid
-from botocore.exceptions import BotoCoreError, ClientError
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+from schemas import AWSConfig
 
 
-
-s3_client = boto3.client(
-    "s3",
-    aws_access_key_id="",
-    aws_secret_access_key="",
-    region_name="",
-)
+def get_active_aws_config(db: Session):
+    config = db.query(AWSConfig).filter(AWSConfig.is_active == True).first()
+    if not config:
+        raise HTTPException(status_code=500, detail="AWS config not found")
+    return config
 
 
-def upload_file_to_s3(file_obj, filename: str, content_type: str) -> str:
+def upload_file_to_s3(upload_file, db: Session) -> str:
     try:
-        unique_name = f"properties/{uuid.uuid4()}-{filename}"
+        config = get_active_aws_config(db)
 
-        s3_client.upload_fileobj(
-            file_obj,
-            AWS_S3_BUCKET,
-            unique_name,
-            ExtraArgs={
-                "ContentType": content_type,
-                # "ACL": "public-read",  # remove if bucket is private
-            },
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=config.aws_access_key_id,
+            aws_secret_access_key=config.aws_secret_access_key,
+            region_name=config.aws_region,
         )
 
-        file_url = f"https://{AWS_S3_BUCKET}.s3.{AWS_REGION}.amazonaws.com/{unique_name}"
-        return file_url
+        unique_name = f"properties/{uuid.uuid4()}-{upload_file.filename}"
 
-    except (BotoCoreError, ClientError) as e:
-        raise Exception(f"S3 upload failed: {str(e)}")
+        s3.upload_fileobj(
+            upload_file.file,  # ✅ correct
+            config.aws_s3_bucket,
+            unique_name,
+            ExtraArgs={"ContentType": upload_file.content_type},  # ✅ correct
+        )
+
+        return f"https://{config.aws_s3_bucket}.s3.{config.aws_region}.amazonaws.com/{unique_name}"
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"S3 upload failed: {str(e)}")

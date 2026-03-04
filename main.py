@@ -165,22 +165,13 @@ def list_properties(skip: int = 0, limit: int = 50, db: Session = Depends(get_db
     return crud.list_propertiesNew(db, skip, limit)
 
 @app.post("/upload-image")
-async def upload_image(file: UploadFile = File(...)):
-    try:
-        # basic validation
-        if not file.content_type.startswith("image/"):
-            raise HTTPException(status_code=400, detail="File must be an image")
+async def upload_image(
+    image: UploadFile = File(...),
+    db: Session = Depends(get_db),
+):
+    url = upload_file_to_s3(image, db)
 
-        file_url = upload_file_to_s3(
-            file.file,
-            file.filename,
-            file.content_type,
-        )
-
-        return {
-            "success": True,
-            "image_url": file_url,
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return {
+        "message": "Image uploaded successfully",
+        "image_url": url,
+    }
