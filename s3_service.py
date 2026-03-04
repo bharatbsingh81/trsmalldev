@@ -3,16 +3,13 @@ import os
 import uuid
 from botocore.exceptions import BotoCoreError, ClientError
 
-AWS_ACCESS_KEY_ID = ""
-AWS_SECRET_ACCESS_KEY = ""
-AWS_REGION = ""
-AWS_S3_BUCKET = ""
+
 
 s3_client = boto3.client(
     "s3",
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=AWS_REGION,
+    aws_access_key_id="",
+    aws_secret_access_key="",
+    region_name="",
 )
 
 
