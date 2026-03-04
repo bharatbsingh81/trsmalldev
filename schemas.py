@@ -117,7 +117,7 @@ class BuilderCreate(BaseModel):
     city: str | None = None
 
 
-
+# this is the latest code
 class CurrentPropertyBase(BaseModel):
     title: Optional[str] = None
     bedrooms: Optional[int] = None
