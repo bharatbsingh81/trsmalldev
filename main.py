@@ -14,8 +14,22 @@ from schemas import ImageDownloadRequest
 from crud import get_images_as_zip
 from s3_service import upload_file_to_s3
 from models import Property
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Property API")
+
+origins = [
+    "http://localhost:3000",          # local frontend dev
+    "https://trs-property.vercel.app/"  # production frontend
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,      # must match frontend exactly
+    allow_credentials=False,    # IMPORTANT (since no auth)
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 '''
 # ✅ CREATE PROPERTY
